@@ -1,4 +1,4 @@
-# :ramen: miso-components
+# :ramen: 🚰 miso-pubsub
 
 ## Build and run
 
