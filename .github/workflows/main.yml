@@ -4,6 +4,7 @@ name: Build and deploy
 on:
   push:
     branches: main
+  pull_request:
 
 permissions:
   contents: read
@@ -33,6 +34,7 @@ jobs:
     runs-on: ubuntu-latest
 
     environment:
+    if: github.ref == 'refs/heads/main'
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 

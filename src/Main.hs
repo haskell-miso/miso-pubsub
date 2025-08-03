@@ -27,8 +27,10 @@ data Action
   | Unsubscribe
   | Welcomed
   | Oops
+  | Failure MisoString
   | GetComponentId Int
-  | Notification (Result Message)
+  | Notification Message
+  | Init
 -----------------------------------------------------------------------------
 data Message
   = Increment
@@ -36,10 +38,12 @@ data Message
   deriving (Show, Eq, Generic, ToJSON, FromJSON)
 -----------------------------------------------------------------------------
 main :: IO ()
-main = run (startComponent server)
+main = run $ startComponent $ server { initialAction = Just Init }
 -----------------------------------------------------------------------------
 arithmetic :: Topic Message
 arithmetic = topic "arithmetic"
+-----------------------------------------------------------------------------
+type ParentModel = ()
 -----------------------------------------------------------------------------
 -- | Demonstrates a simple server / client, pub / sub setup for 'Component'
 -- In this contrived example, the server component holds the
@@ -48,7 +52,7 @@ arithmetic = topic "arithmetic"
 --
 -- Notice the server has no 'model' (e.g. `()`)
 --
-server :: Component () Action
+server :: App ParentModel Action
 server = component () update_ $ \() ->
   div_
   []
@@ -58,8 +62,17 @@ server = component () update_ $ \() ->
   , p_ [ onMountedWith Mount ] +> client_ "client 1"
   , p_ [ onMountedWith Mount ] +> client_ "client 2"
   ] where
-      update_ :: Action -> Effect () Action
+      update_ :: Action -> Transition ParentModel Action
       update_ = \case
+        Init -> do
+          io_ $ consoleLog ("parent subscribing")
+          subscribe arithmetic Notification Failure
+        Notification Increment ->
+          io_ (consoleLog "parent got increment")
+        Notification Decrement ->
+          io_ (consoleLog "parent got decrement")
+        Failure msg ->
+          io_ $ consoleError ("Decode failure: " <> ms msg)
         AddOne ->
           publish arithmetic Increment
         SubtractOne ->
@@ -68,7 +81,7 @@ server = component () update_ $ \() ->
           mail @MisoString childId "welcome"
         _ -> pure ()
 -----------------------------------------------------------------------------
-client_ :: MisoString -> Component Int Action
+client_ :: MisoString -> Component ParentModel Int Action
 client_ name = (clientComponent name)
   { initialAction = Just Subscribe
   , mailbox = receiveMail
@@ -78,7 +91,7 @@ receiveMail :: Value -> Maybe Action
 receiveMail (String "welcome") = Just Welcomed
 receiveMail _ = Just Oops
 -----------------------------------------------------------------------------
-clientComponent :: MisoString -> Component Int Action
+clientComponent :: MisoString -> Component () Int Action
 clientComponent name = component 0 update_ $ \m ->
   div_
   []
@@ -87,7 +100,7 @@ clientComponent name = component 0 update_ $ \m ->
   , button_ [ onClick Unsubscribe ] [ "unsubscribe" ]
   , button_ [ onClick Subscribe ] [ "subscribe" ]
   ] where
-      update_ :: Action -> Effect Int Action
+      update_ :: Action -> Effect () Int Action
       update_ = \case
         AddOne -> do
           _id += 1
@@ -96,12 +109,12 @@ clientComponent name = component 0 update_ $ \m ->
         Unsubscribe ->
           unsubscribe arithmetic
         Subscribe ->
-          subscribe arithmetic Notification
-        Notification (Success Increment) ->
+          subscribe arithmetic Notification Failure
+        Notification Increment ->
           update_ AddOne
-        Notification (Success Decrement) ->
+        Notification Decrement ->
           update_ SubtractOne
-        Notification (Error msg) ->
+        Failure msg ->
           io_ $ consoleError ("Decode failure: " <> ms msg)
         Welcomed ->
           io_ (consoleLog "I was just welcomed by my parent")
