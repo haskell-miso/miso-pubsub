@@ -11,6 +11,7 @@ module Main where
 import           GHC.Generics
 -----------------------------------------------------------------------------
 import           Miso
+import           Miso.Html
 import           Miso.JSON
 import           Miso.String
 import           Miso.Lens
