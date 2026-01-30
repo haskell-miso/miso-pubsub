@@ -85,9 +85,9 @@ server = component () update_ $ \() ->
         Failure msg ->
           io_ $ consoleError ("Decode failure: " <> ms msg)
         AddOne ->
-          publish arithmetic Increment
+          io_ (publish arithmetic Increment)
         SubtractOne ->
-          publish arithmetic Decrement
+          io_ (publish arithmetic Decrement)
         _ -> pure ()
 -----------------------------------------------------------------------------
 client_ :: MisoString -> Component ParentModel Int Action
