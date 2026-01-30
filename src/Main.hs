@@ -47,7 +47,7 @@ instance FromJSON Message where
   parseJSON = withText "Message" $ \case
     "inc" -> pure Increment
     "dec" -> pure Decrement
-    x -> typeMismatch "Message" x
+    x -> typeMismatch "Message" (String x)
 -----------------------------------------------------------------------------
 main :: IO ()
 main = startApp defaultEvents server { initialAction = Just Init }
