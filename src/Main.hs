@@ -23,7 +23,6 @@ foreign export javascript "hs_start" main :: IO ()
 data Action
   = AddOne
   | SubtractOne
-  | Mount ComponentId
   | Subscribe
   | Unsubscribe
   | Welcomed
@@ -71,8 +70,8 @@ server = component () update_ $ \() ->
   [ "Server component"
   , button_ [ onClick AddOne ] [ "+" ]
   , button_ [ onClick SubtractOne ] [ "-" ]
-  , mount_ [ onMountedWith Mount ] (client_ "client 1")
-  , mount_ [ onMountedWith Mount ] (client_ "client 2")
+  , mount [ key_ "client 1" ] (client_ "client 1")
+  , mount [ key_ "client 2" ] (client_ "client 2")
   ] where
       update_ :: Action -> Transition ParentModel Action
       update_ = \case
@@ -89,8 +88,6 @@ server = component () update_ $ \() ->
           publish arithmetic Increment
         SubtractOne ->
           publish arithmetic Decrement
-        Mount ->
-          mail @MisoString childId "welcome"
         _ -> pure ()
 -----------------------------------------------------------------------------
 client_ :: MisoString -> Component ParentModel Int Action
