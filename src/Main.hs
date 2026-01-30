@@ -38,7 +38,7 @@ data Message
   deriving (Show, Eq, Generic, ToJSON, FromJSON)
 -----------------------------------------------------------------------------
 main :: IO ()
-main = run $ startComponent $ server { initialAction = Just Init }
+main = startApp defaultEvents server { initialAction = Just Init }
 -----------------------------------------------------------------------------
 arithmetic :: Topic Message
 arithmetic = topic "arithmetic"
