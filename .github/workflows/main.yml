@@ -1,4 +1,3 @@
-
 name: Build and deploy
 
 on:
@@ -24,17 +23,17 @@ jobs:
 
       - name: Build using Nix
         run: nix develop .#wasm --command bash -c "make"
-
+        
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     environment:
-    if: github.ref == 'refs/heads/main'
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
@@ -44,4 +43,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
