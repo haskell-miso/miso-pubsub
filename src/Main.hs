@@ -9,9 +9,10 @@
 module Main where
 -----------------------------------------------------------------------------
 import           GHC.Generics
-import           Data.Aeson
 -----------------------------------------------------------------------------
 import           Miso
+import           Miso.Html
+import           Miso.JSON
 import           Miso.String
 import           Miso.Lens
 -----------------------------------------------------------------------------
@@ -22,7 +23,6 @@ foreign export javascript "hs_start" main :: IO ()
 data Action
   = AddOne
   | SubtractOne
-  | Mount ComponentId
   | Subscribe
   | Unsubscribe
   | Welcomed
@@ -35,7 +35,18 @@ data Action
 data Message
   = Increment
   | Decrement
-  deriving (Show, Eq, Generic, ToJSON, FromJSON)
+  deriving (Show, Eq, Generic)
+-----------------------------------------------------------------------------
+instance ToJSON Message where
+  toJSON = \case
+    Increment -> "inc"
+    Decrement -> "dec"
+-----------------------------------------------------------------------------
+instance FromJSON Message where
+  parseJSON = withText "Message" $ \case
+    "inc" -> pure Increment
+    "dec" -> pure Decrement
+    x -> typeMismatch "Message" (String x)
 -----------------------------------------------------------------------------
 main :: IO ()
 main = startApp defaultEvents server { initialAction = Just Init }
@@ -59,8 +70,8 @@ server = component () update_ $ \() ->
   [ "Server component"
   , button_ [ onClick AddOne ] [ "+" ]
   , button_ [ onClick SubtractOne ] [ "-" ]
-  , p_ [ onMountedWith Mount ] +> client_ "client 1"
-  , p_ [ onMountedWith Mount ] +> client_ "client 2"
+  , mount (client_ "client 1")
+  , mount (client_ "client 2")
   ] where
       update_ :: Action -> Transition ParentModel Action
       update_ = \case
@@ -74,11 +85,9 @@ server = component () update_ $ \() ->
         Failure msg ->
           io_ $ consoleError ("Decode failure: " <> ms msg)
         AddOne ->
-          publish arithmetic Increment
+          io_ (publish arithmetic Increment)
         SubtractOne ->
-          publish arithmetic Decrement
-        Mount childId ->
-          mail @MisoString childId "welcome"
+          io_ (publish arithmetic Decrement)
         _ -> pure ()
 -----------------------------------------------------------------------------
 client_ :: MisoString -> Component ParentModel Int Action
