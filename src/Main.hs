@@ -9,9 +9,9 @@
 module Main where
 -----------------------------------------------------------------------------
 import           GHC.Generics
-import           Data.Aeson
 -----------------------------------------------------------------------------
 import           Miso
+import           Miso.JSON
 import           Miso.String
 import           Miso.Lens
 -----------------------------------------------------------------------------
@@ -35,7 +35,18 @@ data Action
 data Message
   = Increment
   | Decrement
-  deriving (Show, Eq, Generic, ToJSON, FromJSON)
+  deriving (Show, Eq, Generic)
+-----------------------------------------------------------------------------
+instance ToJSON Message where
+  toJSON = \case
+    Increment -> "inc"
+    Decrement -> "dec"
+-----------------------------------------------------------------------------
+instance FromJSON Message where
+  parseJSON = withText "Message" $ \case
+    "inc" -> pure Increment
+    "dec" -> pure Decrement
+    x -> typeMismatch "Message" x
 -----------------------------------------------------------------------------
 main :: IO ()
 main = startApp defaultEvents server { initialAction = Just Init }
