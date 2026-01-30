@@ -71,8 +71,8 @@ server = component () update_ $ \() ->
   [ "Server component"
   , button_ [ onClick AddOne ] [ "+" ]
   , button_ [ onClick SubtractOne ] [ "-" ]
-  , p_ [ onMountedWith Mount ] +> client_ "client 1"
-  , p_ [ onMountedWith Mount ] +> client_ "client 2"
+  , mount_ [ onMountedWith Mount ] (client_ "client 1")
+  , mount_ [ onMountedWith Mount ] (client_ "client 2")
   ] where
       update_ :: Action -> Transition ParentModel Action
       update_ = \case
@@ -89,7 +89,7 @@ server = component () update_ $ \() ->
           publish arithmetic Increment
         SubtractOne ->
           publish arithmetic Decrement
-        Mount childId ->
+        Mount ->
           mail @MisoString childId "welcome"
         _ -> pure ()
 -----------------------------------------------------------------------------
