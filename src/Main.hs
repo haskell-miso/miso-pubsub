@@ -70,8 +70,8 @@ server = component () update_ $ \() ->
   [ "Server component"
   , button_ [ onClick AddOne ] [ "+" ]
   , button_ [ onClick SubtractOne ] [ "-" ]
-  , mount (client_ "client 1")
-  , mount (client_ "client 2")
+  , mount_ (client_ "client 1")
+  , mount_ (client_ "client 2")
   ] where
       update_ :: Action -> Effect ROOT ParentModel Action
       update_ = \case
