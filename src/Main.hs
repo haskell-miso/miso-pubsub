@@ -73,7 +73,7 @@ server = component () update_ $ \() ->
   , mount (client_ "client 1")
   , mount (client_ "client 2")
   ] where
-      update_ :: Action -> Transition ParentModel Action
+      update_ :: Action -> Effect ROOT ParentModel Action
       update_ = \case
         Init -> do
           io_ $ consoleLog ("parent subscribing")
