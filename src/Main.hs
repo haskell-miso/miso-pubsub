@@ -92,7 +92,7 @@ server = component () update_ $ \() ->
 -----------------------------------------------------------------------------
 client_ :: MisoString -> Component ParentModel Int Action
 client_ name = (clientComponent name)
-  { initialAction = Just Subscribe
+  { mount = Just Subscribe
   , mailbox = receiveMail
   }
 -----------------------------------------------------------------------------
