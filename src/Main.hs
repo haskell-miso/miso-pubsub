@@ -49,7 +49,7 @@ instance FromJSON Message where
     x -> typeMismatch "Message" (String x)
 -----------------------------------------------------------------------------
 main :: IO ()
-main = startApp defaultEvents server { initialAction = Just Init }
+main = startApp defaultEvents server { mount = Just Init }
 -----------------------------------------------------------------------------
 arithmetic :: Topic Message
 arithmetic = topic "arithmetic"
