@@ -64,9 +64,7 @@ type ParentModel = ()
 -- Notice the server has no 'model' (e.g. `()`)
 --
 server :: App ParentModel Action
-server = component () update_ $ \() ->
-  div_
-  []
+server = component () update_ $ \() -> vfrag
   [ "Server component"
   , button_ [ onClick AddOne ] [ "+" ]
   , button_ [ onClick SubtractOne ] [ "-" ]
@@ -101,9 +99,7 @@ receiveMail (String "welcome") = Just Welcomed
 receiveMail _ = Just Oops
 -----------------------------------------------------------------------------
 clientComponent :: MisoString -> Component () Int Action
-clientComponent name = component 0 update_ $ \m ->
-  div_
-  []
+clientComponent name = component 0 update_ $ \m -> vfrag
   [ br_ []
   , text (name <> " : " <> ms (m ^. _id))
   , button_ [ onClick Unsubscribe ] [ "unsubscribe" ]
